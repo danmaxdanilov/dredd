@@ -1,0 +1,29 @@
+version: '3.4'
+
+services:
+  rabbitmq-test:
+    image: rabbitmq:3-management-alpine
+    logging: 
+      driver: none
+
+  dredd-api-functional-test:
+    image: ${REGISTRY:-dredd}/dredd-api-test:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/DREDD/DREDD.API/Dockerfile
+      target: functionaltest
+    depends_on:
+      - rabbitmq-test
+    volumes:
+      - ${BUILD_ARTIFACTSTAGINGDIRECTORY:-./tests-results/}:/tests
+
+  dredd-api-unit-test:
+    image: ${REGISTRY:-dredd}/dredd-api-unit-test:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/DREDD/DREDD.API/Dockerfile
+      target: unittest
+    depends_on:
+      - rabbitmq-test
+    volumes:
+      - ${BUILD_ARTIFACTSTAGINGDIRECTORY:-./tests-results/}:/tests
